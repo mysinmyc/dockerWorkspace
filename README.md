@@ -1,0 +1,3 @@
+# dockerWorkspace
+
+Collection of docker utilities, images,... 

@@ -1,0 +1,11 @@
+
+
+if [ -e ./Dockerfile ] ; then
+	vImage=$( basename $PWD)
+	echo "Current image id $vImage"
+else
+	vImage=$1
+	shift
+fi 
+
+docker run -d -P $vImage $*
