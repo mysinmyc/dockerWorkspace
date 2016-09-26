@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ $# -eq 0 ] ; then
+	echo "usage: $0 {labName}"
+	exit 1
+fi
+
+LABNAME=$1
+
+cat<<EOF
+
+* * * DELETE LAB ${LABNAME} * * *
+
+confirm container removal type [YES] in uppercase
+EOF
+
+read vConfirmation
+
+if [ "${vConfirmation}" = "YES" ] ;then
+	echo "Removing containers..."
+	docker rm -f $( docker ps -q -a --filter "label=LAB=${LABNAME}" )
+	echo "Removing network ${LABNAME}net..."
+	docker network rm $( docker network ls -q  --filter "label=LAB=${LABNAME}" )
+
+else 
+	echo "Action aborted"
+	exit 10
+fi
+

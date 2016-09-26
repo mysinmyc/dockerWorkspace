@@ -1,0 +1,100 @@
+#!/bin/bash
+
+function checkParameters {
+
+
+	while [ -z "${LAB_NAME}" ] 
+	do
+		read -p "Lab Name: " LAB_NAME	
+	done
+	
+	while [ -z "${LAB_CONTAINERS}" ] 
+	do
+		read -p "Number of containers: " LAB_CONTAINERS	
+	done
+	
+	while [ -z "${LAB_STARTINGPORT}" ] 
+	do
+		read -p "Starting port for ssh: " LAB_STARTINGPORT	
+	done
+	
+	while [ -z "${LAB_USERNAMES}" ] 
+	do
+		read -p "Users to define inside the container (separated by,): " LAB_USERNAMES
+	done
+}
+
+
+function createNetwork {
+
+	[ -z "${LAB_NETWORK}" ] && LAB_NETWORK="${LAB_NAME}net"
+	
+	echo "Creating network ${LAB_NETWORK} ..."
+	docker network create --label "LAB=${LAB_NAME}" ${LAB_NETWORK}
+}
+
+
+
+function askPassword {
+
+	if [ -n "${LAB_PASSWORD}" ] ; then
+		return
+	fi
+
+	while true
+	do 	
+		while [ -z "${LAB_PASSWORD}" ] 
+		do
+			read -p "User password: " -s LAB_PASSWORD
+		done
+
+		echo "" 	
+		while [ -z "${vConfirmPassword}" ] 
+		do
+			read -p "Confirm user password: " -s vConfirmPassword
+		done
+		
+		echo "" 	
+		if [ "${LAB_PASSWORD}" = "${vConfirmPassword}" ] ; then
+			return
+		fi
+		
+		echo -e "ERROR: passwords doesn't match!!!\n"
+		unset LAB_PASSWORD vConfirmPassword
+	done
+}
+
+
+function runContainers {
+
+	[ -z "${IMAGE}" ] && IMAGE=mysinmyc/centos7ssh
+	[ -z "${LAB_STARTINGPORT}" ] && LAB_STARTINGPORT=20000
+	[ -z "${LAB_CONTAINERS}" ] && LAB_CONTAINERS=1
+	[ -z "${DOCKERRUN_OPTS}" ] && DOCKERRUN_OPTS="-e ADDUSERS_NAMES=${LAB_USERNAMES} -e ADDUSERS_PASSWORD=${LAB_PASSWORD}"
+	
+	if [ "${LAB_CONTAINERS}" -eq 0 ] ; then
+		return
+	fi
+
+	for vCnt in $(seq 1 ${LAB_CONTAINERS} ) 
+	do
+		vCurContainerName=${LAB_NAME}host${vCnt}
+		vCurContainerSshPort=$(( ${LAB_STARTINGPORT} + $vCnt ))
+		echo "Creating container ${vCurContainerName} ${vCnt}/${LAB_CONTAINERS} sshport: ${vCurContainerSshPort}..."
+		docker run --label "LAB=${LAB_NAME}" -d -p ${vCurContainerSshPort}:22 --net ${LAB_NETWORK} --name ${vCurContainerName} --hostname ${vCurContainerName} ${DOCKERRUN_OPTS} ${IMAGE}
+	done
+	
+}
+
+checkParameters $*
+askPassword
+
+echo "Press ENTER to start"
+read
+
+echo "Started creation of lab ${LAB_NAME}..."
+
+createNetwork
+runContainers
+
+echo "Creation completed"
