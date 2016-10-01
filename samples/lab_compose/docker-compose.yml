@@ -1,0 +1,32 @@
+#
+# VERY LIMITED REPRODUCTION OF dolab_mk WITH DOCKER-COMPOSE
+#
+version: '2'
+
+networks:
+  labcomposenet:
+
+volumes:
+  labcomposeshared:
+
+services:
+  proxy:
+    container_name: labcomposeproxy
+    ports:
+    - 30000:3128
+    image: mysinmyc/squid
+    networks:
+    - labcomposenet
+    volumes:
+    - labcomposeshared:/shared
+  sshhost:
+    container_name: labcomposesshhost
+    env_file:
+    - sshhost_vars.env
+    ports:
+    - 3128
+    image: mysinmyc/centos7ssh
+    networks:
+    - labcomposenet
+    volumes:
+    - labcomposeshared:/shared
