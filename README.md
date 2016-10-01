@@ -1,3 +1,7 @@
-# dockerWorkspace
+dockerWorkspace
+===============
 
-Collection of docker utilities, images,... 
+Collection of docker utilities, images, sample ... 
+
+## License
+[LICENSE](LICENSE.md) 

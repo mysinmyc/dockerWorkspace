@@ -5,7 +5,7 @@
 #
 
 if [ $# -eq 0 ] ; then
-	echo "usage: $0 {labName}"
+	echo "usage: $(basename $0) {labName}"
 	exit 1
 fi
 
@@ -15,11 +15,18 @@ cat<<EOF
 
 * * * DELETE LAB ${LABNAME} * * *
 
-If you continue containers and network will be deleted.
+If you continue the following containers  and networks will be deleted.
+
+--- CONTAINERS TO DELETE ---
+ $( docker ps -a --filter "label=LAB=${LABNAME}") 
+
+--- NETWORKS TO DELETE ---
+$( docker network ls  --filter "label=LAB=${LABNAME}" )
 
 Volume defined in the lab are preserved (to check execute docker volume ls)
 
-to confirm deletion type [YES] in uppercase
+
+Action is unreversible. To confirm deletion type [YES] in uppercase.
 EOF
 
 read vConfirmation
