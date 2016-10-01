@@ -4,4 +4,4 @@ dockerWorkspace
 Collection of docker utilities, images, sample ... 
 
 ## License
-[LICENSE](LICENSE.md) 
+See the [LICENSE](LICENSE.md) file for license rights and limitations 
