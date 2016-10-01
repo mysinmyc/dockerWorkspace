@@ -24,7 +24,7 @@ services:
     env_file:
     - sshhost_vars.env
     ports:
-    - 3128
+    - 22
     image: mysinmyc/centos7ssh
     networks:
     - labcomposenet

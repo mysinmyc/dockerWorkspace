@@ -12,7 +12,7 @@ Centos installations set by default secondary networks as manual. To make interf
 
 
 
-##Allow inconming connections on hostonly interface
+##Allow incoming connections on hostonly interface
 
 To enable incoming connections on a specific interface at firewall level configure **ZONE=trusted** in **/etc/sysconfig/network-scripts/ifcfg-{devicename}**. It required netwrok restart
 
