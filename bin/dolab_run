@@ -1,0 +1,41 @@
+#!/bin/bash
+
+#
+# Run a container inside a lab (it assign the right network ,label, shared volume,...)
+#
+
+function evaluateContainerName {
+
+	vBaseName=$(echo $1 | sed -e "s/.*\///g" | sed -e "s/[0-9]*$//g")
+	CONTAINER_NAME=${vBaseName}
+	vCnt=1
+	while true
+	do
+		CONTAINER_NAME=${vBaseName}${vCnt}
+		if [ $(docker ps -a -q --filter name=${CONTAINER_NAME} | wc -l ) -eq 0 ] ; then 
+			return
+		fi
+		(( vCnt = vCnt + 1 ))
+	done
+		
+}
+
+if [ $# -lt 2 ] ; then
+
+	cat <<EOF
+	usage: $0 {labname} {imagename} [{additional docker run parm1} ...]
+EOF
+	exit 1
+fi
+
+LAB_NAME=$1
+shift
+
+IMAGE_NAME=$1
+shift
+
+evaluateContainerName ${IMAGE_NAME}
+
+echo -e "\nRunning ${CONTAINER_NAME} inside lab ${LAB_NAME} ...\n"
+docker run -d --label LAB=${LAB_NAME} --net ${LAB_NAME}net -v ${LAB_NAME}shared:/shared --name=${CONTAINER_NAME} --hostname=${CONTAINER_NAME} --net-alias=${CONTAINER_NAME}.${LAB_NAME}net $* ${IMAGE_NAME}
+

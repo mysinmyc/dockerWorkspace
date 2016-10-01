@@ -1,4 +1,10 @@
 #!/bin/bash
+
+#
+# DOBUILD 
+# 	Build an image from current folder and tag as folder name
+#
+
 if [ -f Dockerfile ] ; then
 	docker build -t $(basename $PWD) .
 else

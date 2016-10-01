@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# Delete a lab except volumes
+#
+
 if [ $# -eq 0 ] ; then
 	echo "usage: $0 {labName}"
 	exit 1
@@ -11,14 +15,20 @@ cat<<EOF
 
 * * * DELETE LAB ${LABNAME} * * *
 
-confirm container removal type [YES] in uppercase
+If you continue containers and network will be deleted.
+
+Volume defined in the lab are preserved (to check execute docker volume ls)
+
+to confirm deletion type [YES] in uppercase
 EOF
 
 read vConfirmation
 
 if [ "${vConfirmation}" = "YES" ] ;then
+
 	echo "Removing containers..."
 	docker rm -f $( docker ps -q -a --filter "label=LAB=${LABNAME}" )
+
 	echo "Removing network ${LABNAME}net..."
 	docker network rm $( docker network ls -q  --filter "label=LAB=${LABNAME}" )
 

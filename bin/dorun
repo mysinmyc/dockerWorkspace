@@ -1,4 +1,11 @@
+#!/bin/bash
 
+
+#
+# DORUN:
+#	Run a container
+#	In case of current folder contains a Dockerfile assume folder name as image name
+#
 
 if [ -e ./Dockerfile ] ; then
 	vImage=$( basename $PWD)
@@ -8,4 +15,5 @@ else
 	shift
 fi 
 
+echo "running a new container from ${vImage}"
 docker run -d -P $vImage $*

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#
+# Return path of a docker volume
+#
+
+[ $# -ne 1 ] && echo "usage: $(basename $0) {volumeNameOrId}" && exit 1
+
+docker volume inspect $1 --format "{{.Mountpoint}}"
+

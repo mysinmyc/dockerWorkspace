@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#
+# Show output of docker ps limited to a lab
+#
+
+if [ $# -eq 0 ] ; then
+	cat <<EOF 
+	usage: $0 {labName} [ps params]
+
+		{labName} lab name (all=show containers from all labs)
+		
+EOF
+	exit 1
+fi
+
+LABNAME=$1
+shift
+
+if [ "${LABNAME}" = "all" ] ; then
+
+	docker ps --filter "label=LAB" $*
+else
+	docker ps --filter "label=LAB=${LABNAME}" $*
+fi

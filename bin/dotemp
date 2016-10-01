@@ -1,0 +1,16 @@
+#!/bin/bash 
+
+#
+# Run a temprary  container
+#
+
+if [ -e ./Dockerfile ] ; then
+        vImage=$( basename $PWD)
+        echo "Current image id $vImage"
+else
+	[ $# -eq 0 ] && echo "USAGE: $(basename $0) {image} [optional parms...]" && exit 1
+        vImage=$1
+        shift
+fi
+
+docker run -t -i --rm $vImage $*
