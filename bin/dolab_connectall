@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#
+# This script connect a container to all the lab network
+#
+
+if [ $# -ne 1 ] ; then
+	cat <<EOF
+Connect a container to all the lab networks
+usage: $(basename $0) {container}
+EOF
+	exit 1
+fi
+
+vContainer=$1
+shift
+
+docker network ls -q --filter "label=LAB"  | while read vCurNetwork 
+do
+	vCurNetworkName=$( docker network inspect --format "{{.Name}}" ${vCurNetwork})
+
+	echo "Connecting ${vContainer} to ${vCurNetworkName}..."
+	docker network connect ${vCurNetwork} ${vContainer}
+done
+

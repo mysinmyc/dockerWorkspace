@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#
+# Create default containers for LAB and attach to existing
+#
+
+vHOME="$(dirname $0)"
+
+cat <<EOF
+
+ * * * This script create default lab containers * * *
+
+Press ENTER to continue
+EOF
+
+read
+
+docker run -d -p 53128:3128 --label LAB=default --name labdefsquid --hostname labdefsquid mysinmyc/squid
+"${vHOME}/dolab_connectall" labdefsquid
+
+docker run -d -p 50443:8443 --label LAB=default --name labdefdraftterm --hostname labdefdraftterm mysinmyc/draftterm
+"${vHOME}/dolab_connectall" labdefdraftterm
+
