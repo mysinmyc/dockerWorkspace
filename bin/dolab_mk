@@ -50,7 +50,7 @@ function checkParameters {
 
         while [ -z "${LAB_ADDPROXY}" ]
         do
-                read -e -i y -p "Add proxy container on starting port (y/n): " LAB_ADDPROXY
+                read -e -i n -p "Add proxy container on starting port (y/n): " LAB_ADDPROXY
         done
 
         while [ -z "${LAB_CONTAINERS}" ]
@@ -71,6 +71,7 @@ function checkParameters {
 }
 
 
+
 function createNetwork {
 
 	[ -z "${LAB_NETWORK}" ] && LAB_NETWORK="${LAB_NAME}net"
@@ -78,6 +79,24 @@ function createNetwork {
 	echo "Creating network ${LAB_NETWORK} ..."
 	docker network create --label "LAB=${LAB_NAME}" ${LAB_NETWORK}
 }
+
+
+
+function connectDefaultContainers {
+
+	echo "Connecting default containers to ${LAB_NETWORK}..."
+
+	docker ps -a -q --filter "label=LAB=default" | while read vCurId
+	do 
+		docker inspect --format "{{.Name}},{{.Config.Hostname}}" ${vCurId} | while IFS=, read vCurName vCurHostname
+		do
+			vCurAlias=${vCurHostname}.${LAB_NETWORK}
+			echo " - Connecting ${vCurName} as ${vCurAlias} ..."
+			docker network connect --alias ${vCurAlias} ${LAB_NETWORK} ${vCurId}
+		done
+	done
+}
+
 
 
 function createSharedVolume {
@@ -88,6 +107,8 @@ function createSharedVolume {
 	docker volume create --label "LAB=${LAB_NAME}" --name ${LAB_SHAREDVOLUME}
 }
 
+
+
 function runProxy {
 	if [ ! "${LAB_ADDPROXY}" = "y" ] ; then
 		return
@@ -96,6 +117,9 @@ function runProxy {
 	docker run --label "LAB=${LAB_NAME}" -d -p ${LAB_STARTINGPORT}:3128 --net ${LAB_NETWORK} --name ${LAB_NAME}proxy mysinmyc/squid
 	
 }
+
+
+
 function runContainers {
 
 	[ -z "${IMAGE}" ] && IMAGE=mysinmyc/centos7ssh
@@ -117,6 +141,8 @@ function runContainers {
 	
 }
 
+
+
 checkParameters $*
 
 echo "Press ENTER to start"
@@ -125,6 +151,7 @@ read
 echo "Started creation of lab ${LAB_NAME}..."
 
 createNetwork
+connectDefaultContainers
 createSharedVolume
 runProxy
 runContainers
