@@ -2,18 +2,16 @@
 
 
 #
-# DORUN:
-#	Run a container
-#	In case of current folder contains a Dockerfile assume folder name as image name
+# Run a new container from current image
 #
 
-if [ -e ./Dockerfile ] ; then
-	vImage=$( basename $PWD)
-	echo "Current image id $vImage"
-else
-	vImage=$1
-	shift
-fi 
+. "$(dirname $0)/do_setVars.sh"
+
+if [ -z "${DOCKER_IMAGE}" ] ; then
+	[ $# -eq 0 ] && echo "USAGE: $(basename $0) {image} [optional parms...]" && exit 1
+        DOCKER_IMAGE=$1
+        shift
+fi
 
 echo "running a new container from ${vImage}"
-docker run -d -P $vImage $*
+docker run -d -P ${DOCKER_IMAGE} $*

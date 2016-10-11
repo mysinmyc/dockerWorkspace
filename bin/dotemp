@@ -4,13 +4,18 @@
 # Run a temprary  container
 #
 
-if [ -e ./Dockerfile ] ; then
-        vImage=$( basename $PWD)
-        echo "Current image id $vImage"
-else
+. "$(dirname $0)/do_setVars.sh"
+
+if [ -z "${DOCKER_IMAGE}" ] ; then
 	[ $# -eq 0 ] && echo "USAGE: $(basename $0) {image} [optional parms...]" && exit 1
-        vImage=$1
+        DOCKER_IMAGE=$1
         shift
 fi
 
-docker run -t -i --rm $vImage $*
+ARGS="$*"
+
+if [ -z "${ARGS}" ] ; then 
+	ARGS="/bin/sh -l"	
+fi	
+
+docker run -t -i --rm ${DOCKER_IMAGE} ${ARGS}

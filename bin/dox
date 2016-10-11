@@ -1,0 +1,32 @@
+#!/bin/bash
+
+
+#
+# Run a temporary interactive container with host networking, DISPLAY redirection and home shared with the host ( ${HOME}/dox
+#
+
+. "$(dirname $0)/do_setVars.sh"
+
+if [ -z "${DOCKER_IMAGE}" ] ; then
+        [ $# -eq 0 ] && echo "USAGE: $(basename $0) {image} [optional parms...]" && exit 1
+        DOCKER_IMAGE=$1
+        shift   
+fi
+
+GID=$(id -g)
+GROUP=$(id -g -n)
+
+
+vHOST_HOME=${HOME}/dox
+vCONTAINER_HOME=/home/${USER}
+
+[ -d ${vHOST_HOME} ] || mkdir ${vHOST_HOME} 
+
+xauth list > ${vHOST_HOME}/.Xauthority
+
+echo "${USER}:x:${UID}:${GID}::${vCONTAINER_HOME}:/bin/bash" > /tmp/dox_$$_passwd
+echo "${GROUP}:x:${GID}:${USER}" > /tmp/dox_$$_group
+
+docker run -t -i --rm --net=host --user=${UID}:${GID} --userns=host -v /tmp/dox_$$_passwd:/etc/passwd:ro -v /tmp/dox_$$_group:/etc/group:ro -v ${vHOST_HOME}:${vCONTAINER_HOME}:rw -e DISPLAY=${DISPLAY} --tmpfs /var/run --tmpfs /tmp --read-only ${DOCKER_IMAGE}  bash -l
+
+rm /tmp/dox_$$_*
