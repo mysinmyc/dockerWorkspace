@@ -19,14 +19,15 @@ GROUP=$(id -g -n)
 
 vHOST_HOME=${HOME}/dox
 vCONTAINER_HOME=/home/${USER}
+vCMD="$*"
+[ -z "${vCMD}" ] && vCMD="/bin/sh"
 
 [ -d ${vHOST_HOME} ] || mkdir ${vHOST_HOME} 
-
-xauth list > ${vHOST_HOME}/.Xauthority
+[ -e ${HOME}/.Xauthority ] && cp ${HOME}/.Xauthority  ${vHOST_HOME}/.Xauthority
 
 echo "${USER}:x:${UID}:${GID}::${vCONTAINER_HOME}:/bin/bash" > /tmp/dox_$$_passwd
 echo "${GROUP}:x:${GID}:${USER}" > /tmp/dox_$$_group
 
-docker run -t -i --rm --net=host --user=${UID}:${GID} --userns=host -v /tmp/dox_$$_passwd:/etc/passwd:ro -v /tmp/dox_$$_group:/etc/group:ro -v ${vHOST_HOME}:${vCONTAINER_HOME}:rw -e DISPLAY=${DISPLAY} --tmpfs /var/run --tmpfs /tmp --read-only ${DOCKER_IMAGE}  bash -l
+docker run -t -i --rm --net=host --user=${UID}:${GID} --userns=host -v /tmp/dox_$$_passwd:/etc/passwd:ro -v /tmp/dox_$$_group:/etc/group:ro -v ${vHOST_HOME}:${vCONTAINER_HOME}:rw -e DISPLAY=${DISPLAY} --tmpfs /var/run --tmpfs /tmp --read-only ${DOCKER_IMAGE}  ${vCMD}
 
 rm /tmp/dox_$$_*
