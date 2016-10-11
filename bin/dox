@@ -16,10 +16,12 @@ fi
 GID=$(id -g)
 GROUP=$(id -g -n)
 
+umask 077
 
 vHOST_HOME=${HOME}/dox
 vCONTAINER_HOME=/home/${USER}
 vCMD="$*"
+
 [ -z "${vCMD}" ] && vCMD="/bin/sh"
 
 [ -d ${vHOST_HOME} ] || mkdir ${vHOST_HOME} 
@@ -28,6 +30,12 @@ vCMD="$*"
 echo "${USER}:x:${UID}:${GID}::${vCONTAINER_HOME}:/bin/bash" > /tmp/dox_$$_passwd
 echo "${GROUP}:x:${GID}:${USER}" > /tmp/dox_$$_group
 
-docker run -t -i --rm --net=host --user=${UID}:${GID} --userns=host -v /tmp/dox_$$_passwd:/etc/passwd:ro -v /tmp/dox_$$_group:/etc/group:ro -v ${vHOST_HOME}:${vCONTAINER_HOME}:rw -e DISPLAY=${DISPLAY} --tmpfs /var/run --tmpfs /tmp --read-only ${DOCKER_IMAGE}  ${vCMD}
+if [ -e /etc/machine-id ] ; then
+	cat /etc/machine-id > /tmp/dox_$$_machine-id
+else
+	uuidgen | sed -e "s/-//g" > /tmp/dox_$$_machine-id
+fi
 
-rm /tmp/dox_$$_*
+docker run -t -i --rm --net=host --user=${UID}:${GID} --userns=host -v /tmp/dox_$$_machine-id:/etc/machine-id:ro -v /tmp/dox_$$_passwd:/etc/passwd:ro -v /tmp/dox_$$_group:/etc/group:ro -v ${vHOST_HOME}:${vCONTAINER_HOME}:rw -e DISPLAY=${DISPLAY} --tmpfs /var/run --tmpfs /tmp --read-only ${DOCKER_IMAGE}  ${vCMD}
+
+rm -f /tmp/dox_$$_*
