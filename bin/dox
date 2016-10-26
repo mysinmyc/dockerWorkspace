@@ -22,7 +22,10 @@ vHOST_HOME=${HOME}/dox
 vCONTAINER_HOME=/home/${USER}
 vCMD="$*"
 
-[ -z "${vCMD}" ] && vCMD="/bin/sh"
+if [ -z "${vCMD}" ];then
+	docker history ${DOCKER_IMAGE} --no-trunc | grep "#(nop)\s*ENTRYPOINT" > /dev/null 2>&1
+	[ $? -gt 0 ] && vCMD="/bin/sh"
+fi
 
 [ -d ${vHOST_HOME} ] || mkdir ${vHOST_HOME} 
 [ -e ${HOME}/.Xauthority ] && cp ${HOME}/.Xauthority  ${vHOST_HOME}/.Xauthority
