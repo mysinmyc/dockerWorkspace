@@ -1,6 +1,6 @@
 # EKANITE
 
-A collection of cloud backup utilities i like
+basic log collection and analisys
 
 
 
