@@ -6,8 +6,7 @@ build: rclone
 	docker build -t $(IMAGE_TAG) .
 
 rclone: 
-	docker run --rm -v $(srcdir):/go/bin golang go get github.com/mysinmyc/rclone
-
+	docker run --userns host --rm -v $(srcdir):/go/bin golang sh -c 'mkdir -p $$GOPATH/src/github.com/ncw/rclone && git clone https://github.com/mysinmyc/rclone.git  $$GOPATH/src/github.com/ncw/rclone && go get github.com/ncw/rclone'
 
 .PHONY: clean
 
