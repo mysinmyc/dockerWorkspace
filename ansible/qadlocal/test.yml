@@ -1,0 +1,8 @@
+---
+- name: remove user from centos
+  hosts: all
+  tasks:
+  - user: 
+     name: user
+     state: absent
+    when: Config.Image is match('mysinmyc/centos7ssh')
