@@ -1,0 +1,9 @@
+---
+- name: remove user from centos
+  hosts: all
+  tasks:
+  - user: 
+     name: user
+     state: absent
+    when: inventory_hostname in groups['image_mysinmyc/centos7ssh'] and inventory_hostname in groups['running']
+
