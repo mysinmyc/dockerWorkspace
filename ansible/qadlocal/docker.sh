@@ -31,7 +31,7 @@ case $1 in
                 list
         ;;
         --host)
-        	docker inspect $2 -f "{{json .Config}} "
+        	docker inspect $2 -f "{{json .}} "
         ;;
         *)
                 exit 10
