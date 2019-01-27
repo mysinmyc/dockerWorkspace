@@ -19,7 +19,6 @@ cat <<EOF
         ],
         "vars": {
             "ansible_connection": "docker",
-            "remote_user": "rootx"
         }
     }
 }
