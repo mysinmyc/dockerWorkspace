@@ -5,4 +5,5 @@
   - user: 
      name: user
      state: absent
-    when: Config.Image is match('mysinmyc/centos7ssh')
+    when: Config.Image is defined and Config.Image == 'mysinmyc/centos7ssh'
+
