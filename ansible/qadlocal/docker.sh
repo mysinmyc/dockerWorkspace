@@ -3,7 +3,7 @@
 function list {
 cat <<EOF
 {
-    "group": {
+    "containers": {
         "hosts": [
 EOF
 
