@@ -1,0 +1,61 @@
+---
+- hosts: localhost
+  tasks:
+  - name: check docker network
+    docker_network:
+     name: "{{netName}}" 
+     state: present
+  - name: clean lab containers
+    docker_container: 
+     name: "{{ item }}"
+     state: absent
+    when: hostvars[item].docker_config is defined and hostvars[item].docker_config.Labels.LAB is defined and hostvars[item].docker_config.Labels.LAB == labName
+    with_items: "{{ groups['all'] }}"
+  - name: create db container
+    docker_container:
+     name: "{{ labName }}_db"
+     state: started
+     image: mysinmyc/centos7ssh
+     labels:
+      LAB: "{{labName}}"
+      LABROLE: "db"
+     networks:
+      - name: "{{netName}}"
+  - name: create other containers
+    docker_container:
+     name: "{{ labName }}_{{item}}"    
+     state: started
+     image: mysinmyc/centos7ssh
+     labels:
+      LAB: "{{labName}}"
+      LABROLE: "generic"
+     networks:
+      - name: "{{netName}}"
+    with_sequence: "1-{{numContainers}}"
+  - name: addcontainers to LAB group
+    add_host: 
+     name: "{{ item}}"
+     groups: LAB_all
+    when: hostvars[item].docker_config is defined and hostvars[item].docker_config.Labels.LAB is defined and hostvars[item].docker_config.Labels.LAB == labName
+    with_items: "{{ groups['all'] }}"
+- hosts: LAB_all
+  tasks:
+   - name: add lab containers to target group
+     group_by:
+      key: "LAB_{{docker_config.Labels.LABROLE}}"
+      parents:
+      - LAB_all
+- hosts: LAB_generic
+  tasks:
+   - name: remote user user
+     user: 
+      name: user
+      state: absent
+   - name: add user pippo
+     user:
+      name: pippo
+- hosts: LAB_db
+  tasks: 
+  - name: install mariadb on db containers
+    package: 
+     name: mariadb-server
