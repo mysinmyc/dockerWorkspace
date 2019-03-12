@@ -1,0 +1,72 @@
+version: '3'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.1
+    container_name: elasticsearch
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9200:9200
+    networks:
+      - elklab_net
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.6.1
+    ports:
+      - 5601:5601
+    networks:
+      - elklab_net
+    depends_on:
+      - elasticsearch
+  _initlogs:
+    image: alpine
+    command: sh -c "chmod -R 2777 /input/logs && chown -R :1000 /input/logs"
+    volumes:
+      - sharedlogs:/input/logs
+  logstash:
+    build: logstash
+    networks:
+      - elklab_net
+    volumes:
+      - sharedlogs:/input/logs
+  filebeat:
+    build: filebeat
+    networks:
+      - elklab_net
+    volumes:
+      - sharedlogs:/input/logs
+  rsyslog:
+    build: rsyslog
+    networks:
+      - elklab_net
+    volumes:
+      - sharedlogs:/input/logs
+    ports:
+      - 10514:10514/udp
+      - 11514:11514
+  squid:
+    build: squid
+    networks:
+      - elklab_net
+    volumes:
+      - sharedlogs:/input/logs
+    ports:
+      - 3128:3128
+      - 3129:3129
+  httpd:
+    build: httpd
+    networks:
+      - elklab_net
+    volumes:
+      - sharedlogs:/input/logs
+    ports:
+      - 8080:80
+volumes:
+  sharedlogs:
+networks:
+  elklab_net:
